@@ -190,6 +190,28 @@ const handlePrice = async (req, res, priceRange) => {
     }
 };
 
+const handleCategory = async (req, res, categoryId) => {
+    try {
+        //console.log("Products found:", products);
+        const products = await prisma.product.findMany({
+            where: {
+                categoryId:{
+                    in: categoryId.map((id) => Number(id))
+                }
+            },
+            include: {
+                category: true,
+                images: true
+            }
+        })
+        
+        res.send(products)
+    } catch (err) {
+        //console.error("Error in handlePrice:", err); // Log ข้อผิดพลาด
+        res.status(500).json({ message: "serve price error" })
+    }
+};
+
 exports.searchFilter = async (req, res) => {
     try {
         
@@ -204,6 +226,7 @@ exports.searchFilter = async (req, res) => {
         
         if (category) {
             console.log("category = ", category);
+            await handleCategory(req, res, category)
         }
 
         if (price){

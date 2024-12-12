@@ -22,11 +22,38 @@ exports.authCheck = async (req, res,  next) =>{
                 email: req.user.email
             }
         })
-        console.log(req.user)
-        console.log("Middlewares complete")
+
+        if(!user.enabled){
+            return res.status(400).json({message:"Accout cannot access"})
+        }
+
+
         next()
     }catch(err){
         console.log(err)
         res.status(500).json({message: "Token Invaild"})
+    }
+}
+
+//admin check
+exports.adminCheck = async(req, res, next) =>{
+    try{
+        const {email} = req.user
+        
+
+        const adminUser = await prisma.user.findFirst({
+            where:{
+                email: email
+            }
+        })
+        //console.log(adminUser)
+        if(!adminUser || adminUser.role !== "admin"){
+            return res.status(403).json({message: "Acess Denide: Admin Only!"})
+        }
+
+        next()
+    }catch(err){
+        console.log(err)
+        res.status(500).json({message:"Error Admin access denide"})
     }
 }
